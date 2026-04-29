@@ -1,0 +1,28 @@
+# CMake build and install directories
+build/
+cmake-build-*/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Compiled objects and binaries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Generated experiment output
+lexical_analysis/output/
+syntax_analysis_top_down/output/
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp

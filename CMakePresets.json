@@ -1,0 +1,74 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "description": "Debug build in out/build/debug",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build in out/build/release",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "Build all debug targets",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "displayName": "Build all release targets",
+      "configurePreset": "release"
+    },
+    {
+      "name": "lexical_analysis",
+      "displayName": "Build lexical analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "lexical_analysis"
+      ]
+    },
+    {
+      "name": "syntax_analysis_top_down",
+      "displayName": "Build top-down syntax analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "syntax_analysis_top_down"
+      ]
+    },
+    {
+      "name": "run_lexical_analysis",
+      "displayName": "Run lexical analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "run_lexical_analysis"
+      ]
+    },
+    {
+      "name": "run_syntax_analysis_top_down",
+      "displayName": "Run top-down syntax analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "run_syntax_analysis_top_down"
+      ]
+    }
+  ]
+}

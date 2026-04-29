@@ -1,0 +1,15 @@
+int main() {
+    int bad_oct = 09;
+    int bad_hex = 0x;
+    int bad_suffix = 123abc;
+
+    char bad_escape = '\q';
+    char bad_char = 'ab';
+    char unclosed_char = '
+
+    char *bad_string_escape = "hello\q";
+    char *unclosed_string = "hello
+
+    @
+
+    /* unclosed comment

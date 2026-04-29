@@ -1,0 +1,10 @@
+int main()
+{
+    string s1 = "wfy";
+    string s2 = "wfy";
+
+    int a1 = 12;
+    string a2 = "12";
+
+    return 0;
+}

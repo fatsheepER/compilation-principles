@@ -1,0 +1,17 @@
+int main() {
+    int a = 10;
+    int b = 077;
+    int c = 0x1f;
+    char ch = 'a';
+    char nl = '\n';
+    char *msg = "hello";
+
+    // increase a
+    if (a < c && b != 0) {
+        a += 1;
+        b--;
+    }
+
+    /* finish */
+    return 0;
+}
