@@ -12,6 +12,7 @@ enum class SymbolKind { Terminal, NonTerminal };
 enum class Terminal {
 	Id,     // i
 	Plus,   // +
+	Mul,    // *
 	LParen, // (
 	RParen, // )
 	End     // #
@@ -59,7 +60,7 @@ class Grammar {
   private:
 	// 产生式
 	std::vector<Production> productions_;
-	// 预测分析表
+	// 预测分析表: (NT, T) -> PID
 	std::map<std::pair<NonTerminal, Terminal>, int> table_;
 
 	void addProduction(Production production);
