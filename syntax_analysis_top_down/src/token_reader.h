@@ -34,9 +34,9 @@ class TokenReader {
 
   private:
 	struct RawToken {
-		std::string lexeme;
-		int code = -1;
-		std::size_t line = 0;
+		std::string lexeme;   // token 字符串量
+		int code = -1;        // token 对应序号
+		std::size_t line = 0; // token 所在行号
 	};
 
 	static std::string readWholeFile(const std::string &path);
