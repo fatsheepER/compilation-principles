@@ -76,5 +76,8 @@ int main(int argc, char *argv[]) {
 		std::cout << "语法分析输出目录: " << output_dir << "\n";
 
 		return 0;
+	} catch (const std::exception &ex) {
+		std::cerr << "Fatal error: " << ex.what() << "\n";
+		return 1;
 	}
 }
