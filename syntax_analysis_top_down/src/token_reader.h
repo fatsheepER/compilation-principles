@@ -19,6 +19,9 @@ struct ExpressionInput {
 	std::vector<TokenReadError> errors;
 };
 
+// TokenReader 读取完整个 token 文件后的输出
+// 如果 token 文件有词法分析错误，直接输出错误文本
+// 如果 token 文件通过了词法分析，会整理所有表达式以及 token 级错误
 struct TokenReaderResult {
 	bool lexical_passed = true;
 	std::string lexical_error_text;
