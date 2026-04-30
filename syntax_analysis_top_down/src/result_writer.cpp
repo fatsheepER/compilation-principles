@@ -103,11 +103,11 @@ ResultWriter::write(const std::string &output_dir,
 			continue;
 		}
 
-		steps_ofs << "步骤\t分析栈\t剩余输入\t动作\n";
+		steps_ofs << "步骤\t分析栈\t\t剩余输入\t\t动作\n";
 		for (const auto &step : report.parse_result.steps) {
-			steps_ofs << step.index << "\t";
-			steps_ofs << step.stack << "\t";
-			steps_ofs << step.remaining_input << "\t";
+			steps_ofs << step.index << "\t\t";
+			steps_ofs << step.stack << "\t\t";
+			steps_ofs << step.remaining_input << "\t\t";
 			steps_ofs << step.action << "\n";
 		}
 
