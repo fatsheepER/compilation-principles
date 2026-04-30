@@ -35,6 +35,7 @@ PredictiveParser::parse(const std::vector<InputToken> &raw_input) const {
 
 	while (!stack.empty()) {
 		const Symbol top = stack.back();
+		const std::string stack_before_pop = stackToString(stack);
 		stack.pop_back();
 
 		const InputToken &current = input[position];
@@ -42,7 +43,7 @@ PredictiveParser::parse(const std::vector<InputToken> &raw_input) const {
 
 		ParseStep step;
 		step.index = step_index++;
-		step.stack = stackToString(stack);
+		step.stack = stack_before_pop;
 		step.remaining_input = remainingInputToString(input, position);
 
 		// 如果 X 是终结符
