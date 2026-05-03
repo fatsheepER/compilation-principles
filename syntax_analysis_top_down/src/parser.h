@@ -26,7 +26,7 @@ struct ParseStep {
 	int index = 0;
 	std::string stack;
 	std::string remaining_input;
-	std::string action;
+	std::string action; // 使用产生式 or 匹配终结符
 };
 
 struct ParseResult {

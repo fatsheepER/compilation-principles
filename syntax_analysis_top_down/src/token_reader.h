@@ -38,11 +38,13 @@ class TokenReader {
   private:
 	struct RawToken {
 		std::string lexeme;   // token 字符串量
-		int code = -1;        // token 对应序号
+		int code = -1;        // token 对应种别码
 		std::size_t line = 0; // token 所在行号
 	};
 
+	// 用于读取错误文件判断是否为空
 	static std::string readWholeFile(const std::string &path);
+
 	static std::string trim(const std::string &text);
 
 	static RawToken parseTokenLine(const std::string &line,
