@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 		if (read_result.lexical_passed) {
 			PredictiveParser parser;
-			ExpressionEvaluator evaluatar;
+			ExpressionEvaluator evaluator;
 
 			// 逐表达式进行语法分析
 			for (const auto &expression : read_result.expressions) {
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 					if (report.parse_result.accepted) {
 						report.evaluation_ran = true;
 						report.evaluation_result =
-						    evaluatar.evaluate(report.tokens);
+						    evaluator.evaluate(report.tokens);
 					}
 				}
 
