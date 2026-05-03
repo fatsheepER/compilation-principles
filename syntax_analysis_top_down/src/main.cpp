@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 			std::cout << "词法分析未通过，未执行语法分析\n";
 		}
 		else {
-			std::cout << "语法分析完n";
+			std::cout << "语法分析完毕\n";
 			std::cout << "共分析 " << summary.total << " 条表达式\n";
 			std::cout << "正确共 " << summary.accpeted << "条\n";
 			std::cout << "错误共 " << summary.rejected << "条\n";
