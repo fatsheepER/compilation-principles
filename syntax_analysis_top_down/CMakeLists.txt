@@ -3,6 +3,8 @@ add_library(syntax_analysis_top_down_lib
     src/parser.cpp
     src/token_reader.cpp
     src/result_writer.cpp
+    src/evaluator.h
+    src/evaluator.cpp
 )
 
 target_include_directories(syntax_analysis_top_down_lib

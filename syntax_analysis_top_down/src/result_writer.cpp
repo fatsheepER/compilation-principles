@@ -67,6 +67,18 @@ ResultWriter::write(const std::string &output_dir,
 		if (accepted) {
 			++summary.accpeted;
 			result_ofs << "表达式 " << report.index << ": 正确\n";
+
+			if (report.evaluation_ran) {
+				if (report.evaluation_result.available) {
+					result_ofs << "计算结果: " << report.evaluation_result.value
+					           << "\n";
+				}
+				else {
+					result_ofs
+					    << "计算结果: " << report.evaluation_result.message
+					    << "\n";
+				}
+			}
 		}
 		else {
 			++summary.rejected;

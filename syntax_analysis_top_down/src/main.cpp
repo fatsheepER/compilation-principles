@@ -1,3 +1,4 @@
+#include "evaluator.h"
 #include "parser.h"
 #include "result_writer.h"
 #include "token_reader.h"
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
 
 		if (read_result.lexical_passed) {
 			PredictiveParser parser;
+			ExpressionEvaluator evaluatar;
 
 			// 逐表达式进行语法分析
 			for (const auto &expression : read_result.expressions) {
@@ -49,6 +51,12 @@ int main(int argc, char *argv[]) {
 				if (report.input_errors.empty()) {
 					report.parser_ran = true;
 					report.parse_result = parser.parse(report.tokens);
+
+					if (report.parse_result.accepted) {
+						report.evaluation_ran = true;
+						report.evaluation_result =
+						    evaluatar.evaluate(report.tokens);
+					}
 				}
 
 				reports.push_back(report);

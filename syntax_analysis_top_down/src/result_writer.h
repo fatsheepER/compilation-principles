@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "evaluator.h"
 #include "parser.h"
 #include "token_reader.h"
 
@@ -16,6 +17,9 @@ struct ExpressionReport {
 
 	bool parser_ran = false;
 	ParseResult parse_result;
+
+	bool evaluation_ran = false;
+	EvaluationResult evaluation_result;
 };
 
 struct ResultWriteSummary {
