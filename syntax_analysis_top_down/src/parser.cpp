@@ -160,7 +160,12 @@ PredictiveParser::remainingInputToString(const std::vector<InputToken> &input,
 			oss << ' ';
 		}
 
-		oss << toString(input[i].terminal);
+		if (!input[i].lexeme.empty()) {
+			oss << input[i].lexeme;
+		}
+		else {
+			oss << toString(input[i].terminal);
+		}
 	}
 
 	return oss.str();
