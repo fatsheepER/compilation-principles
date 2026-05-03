@@ -143,6 +143,12 @@ ExpressionEvaluator::evaluate(const std::vector<InputToken> &tokens) const {
 	EvaluatorState state{tokens, 0};
 	EvaluationResult result = state.parseExpression();
 
+	// 结果本来就有问题
+	if (!result.available) {
+		return result;
+	}
+
+	// 结果貌似没问题，但 parse 出问题
 	if (state.current().terminal != Terminal::End) {
 		return {
 		    false,
@@ -151,5 +157,6 @@ ExpressionEvaluator::evaluate(const std::vector<InputToken> &tokens) const {
 		};
 	}
 
+	// Everything's fine
 	return result;
 }
