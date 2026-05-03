@@ -1,7 +1,6 @@
 #include "parser.h"
 #include "grammar.h"
 
-#include <algorithm>
 #include <cstddef>
 #include <sstream>
 #include <string>
