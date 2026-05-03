@@ -133,7 +133,14 @@ ResultWriter::tokenSequenceToString(const std::vector<InputToken> &tokens) {
 		if (i > 0) {
 			oss << ' ';
 		}
-		oss << toString(tokens[i].terminal);
+
+		// 将 INT_LITERAL 和 i 都还原成原字面量
+		if (!tokens[i].lexeme.empty()) {
+			oss << tokens[i].lexeme;
+		}
+		else {
+			oss << toString(tokens[i].terminal);
+		}
 	}
 
 	return oss.str();
