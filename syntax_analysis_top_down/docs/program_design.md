@@ -30,7 +30,7 @@ F  → ( E ) | i
 
 语法分析程序建议拆分为两部分：
 
-1. `syntax_analysis_top_down_lib`：语法分析库，负责 token 读取、终结符归一化、预测分析和结果生成。
+1. `syntax_analysis_top_down_lib`：语法分析库，负责 token 读取、终结符归一化、预测分析、表达式求值和结果生成。
 2. `syntax_analysis_top_down`：可执行程序，负责命令行入口、路径组织、调用 library 和打印运行摘要。
 
 这样的划分可以让核心语法分析逻辑与程序入口分离，后续如果需要测试 parser、输出分析过程或复用语法分析功能，只需要调用 library。
@@ -56,6 +56,9 @@ syntax_analysis_top_down/
 
     parser.h
     parser.cpp
+
+    evaluator.h
+    evaluator.cpp
 
     diagnostic.h
 
@@ -198,7 +201,39 @@ message
 6. 表达式缺少分号。
 7. 空表达式。
 
-### 4.5 result_writer.h / result_writer.cpp
+### 4.5 evaluator.h / evaluator.cpp
+
+该模块负责在表达式通过语法分析后，尝试计算表达式的具体数值。
+
+求值模块不参与 LL(1) 预测分析，也不改变预测分析表。语法分析阶段仍然把 `TK_INT_LITERAL` 和合法标识符 `i` 统一归一化为文法终结符 `i`；求值阶段则使用 `InputToken.lexeme` 中保留的原始词素区分整数常量和标识符。
+
+主要职责：
+
+1. 接收单条表达式的 `std::vector<InputToken>`。
+2. 按表达式文法的优先级计算整数表达式：
+   - `E` 处理加法。
+   - `T` 处理乘法。
+   - `F` 处理无符号整数和括号表达式。
+3. 当操作数是无符号整数时，将 `lexeme` 转换为 `long long` 并参与计算。
+4. 当表达式中出现标识符 `i` 时，不计算具体值，返回“无法计算，表达式含有标识符 i”。
+5. 当整数超出 `long long` 范围，或求值过程出现异常状态时，返回求值失败信息。
+
+求值结果使用结构化结果表示：
+
+```text
+available: 是否得到有效计算值
+value: 计算结果
+message: 无法计算或求值失败原因
+```
+
+其中 `available == false` 可能表示两类情况：
+
+1. 表达式语法正确，但包含标识符 `i`，因此没有具体数值。
+2. 求值阶段发现异常情况，例如整数范围溢出或求值过程没有停在结束符 `#`。
+
+因此调用方和输出模块应直接保留 `EvaluationResult.message`，不要把所有 `available == false` 都当作语法错误。
+
+### 4.6 result_writer.h / result_writer.cpp
 
 该模块负责输出语法分析结果。
 
@@ -219,7 +254,15 @@ output/error.txt
 
 ```text
 表达式 1: 正确
+计算结果: 3
 表达式 2: 错误
+```
+
+对于语法正确但包含标识符 `i` 的表达式，`result.txt` 应保留语法判断结果，同时说明无法计算具体值，例如：
+
+```text
+表达式 3: 正确
+计算结果: 无法计算，表达式含有标识符 i
 ```
 
 `error.txt` 用于记录详细错误信息，例如：
@@ -265,8 +308,9 @@ output/error.txt
 ```
 
 3. 调用 library 完成语法分析。
-4. 捕获异常并输出错误摘要。
-5. 在命令行打印运行结果摘要，例如：
+4. 对语法分析正确的表达式调用 `ExpressionEvaluator` 尝试求值。
+5. 捕获异常并输出错误摘要。
+6. 在命令行打印运行结果摘要，例如：
 
 ```text
 语法分析完毕.
@@ -305,6 +349,13 @@ output/error.txt
 根据分析栈和预测分析表判断正确 / 错误
         |
         v
+对语法正确的表达式尝试求值
+        |
+        +-- 纯整数表达式 -> 得到计算结果
+        |
+        +-- 含 i 的表达式 -> 保留“正确”，但说明无法计算具体值
+        |
+        v
 写 output/result.txt 和 output/error.txt
         |
         v
@@ -318,8 +369,9 @@ output/error.txt
 1. `grammar`：先把 LL(1) 文法、产生式和预测分析表固定下来。
 2. `parser`：实现教材图 4.4 对应的栈驱动预测分析算法。
 3. `token_reader`：读取词法分析输出，并完成 token 到语法终结符的归一化。
-4. `result_writer`：写入 `result.txt` 和 `error.txt`。
-5. `main.cpp`：组装完整流程。
-6. 更新 `CMakeLists.txt`：新增 `syntax_analysis_top_down_lib`，并让 executable 链接该 library。
+4. `evaluator`：在表达式语法正确后，根据 `InputToken.lexeme` 尝试计算纯整数表达式。
+5. `result_writer`：写入 `result.txt`、`error.txt` 和 `steps.txt`，并在正确表达式后输出计算结果或无法计算原因。
+6. `main.cpp`：组装完整流程。
+7. 更新 `CMakeLists.txt`：新增 `syntax_analysis_top_down_lib`，并让 executable 链接该 library。
 
 这样可以先保证核心预测分析算法正确，再处理文件输入输出和工程集成。
