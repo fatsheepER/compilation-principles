@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 Symbol Symbol::terminalSymbol(Terminal terminal) {
@@ -99,6 +100,14 @@ const std::vector<Terminal> &Grammar::terminals() const { return terminals_; }
 
 const std::vector<NonTerminal> &Grammar::nonTerminals() const {
 	return non_terminals_;
+}
+
+const std::vector<Production> &Grammar::productions() const {
+	return productions_;
+}
+
+void Grammar::addProduction(Production production) {
+	productions_.push_back(std::move(production));
 }
 
 std::string toString(NonTerminal non_terminal) {
