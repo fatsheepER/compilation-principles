@@ -3,6 +3,8 @@ add_library(syntax_analysis_operator_precedence_lib
     src/grammar.cpp
     src/first_last_vt.h
     src/first_last_vt.cpp
+    src/precedence_table.h
+    src/precedence_table.cpp
 )
 
 target_include_directories(syntax_analysis_operator_precedence_lib
