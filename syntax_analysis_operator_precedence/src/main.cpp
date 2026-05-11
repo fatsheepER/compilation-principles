@@ -1,38 +1,35 @@
 #include "first_last_vt.h"
 #include "grammar.h"
+#include "precedence_table.h"
 
 #include <iostream>
-#include <set>
 
 namespace {
-void printTerminalSet(const std::set<Terminal> &terminals) {
-	std::cout << "{ ";
-	bool first = true;
+void printPrecedenceTable(const Grammar &grammar,
+                          const PrecedenceTable &table) {
+	std::cout << "\nPrecedence Table:\n";
 
-	for (const auto terminal : terminals) {
-		if (!first) {
-			std::cout << ", ";
+	std::cout << "    ";
+	for (const auto right : grammar.terminals()) {
+		std::cout << toString(right) << "   ";
+	}
+	std::cout << '\n';
+
+	for (const auto left : grammar.terminals()) {
+		std::cout << toString(left) << "   ";
+
+		for (const auto right : grammar.terminals()) {
+			const auto relation = table.lookup(left, right);
+			const std::string text = relationCell(relation);
+
+			if (text.empty()) {
+				std::cout << "    ";
+			}
+			else {
+				std::cout << text << "   ";
+			}
 		}
 
-		std::cout << toString(terminal);
-		first = false;
-	}
-
-	std::cout << " }";
-}
-
-void printFirstLastVT(const Grammar &grammar, const FirstLastVTResult &result) {
-	std::cout << "FirstVT:\n";
-	for (const auto non_terminal : grammar.nonTerminals()) {
-		std::cout << "FirstVT(" << toString(non_terminal) << ") = ";
-		printTerminalSet(result.first_vt.at(non_terminal));
-		std::cout << '\n';
-	}
-
-	std::cout << "\nLastVT:\n";
-	for (const auto non_terminal : grammar.nonTerminals()) {
-		std::cout << "LastVT(" << toString(non_terminal) << ") = ";
-		printTerminalSet(result.last_vt.at(non_terminal));
 		std::cout << '\n';
 	}
 }
@@ -40,10 +37,29 @@ void printFirstLastVT(const Grammar &grammar, const FirstLastVTResult &result) {
 
 int main() {
 	Grammar grammar;
-	FirstLastVTCalculator calculator;
-	const FirstLastVTResult result = calculator.calculate(grammar);
 
-	printFirstLastVT(grammar, result);
+	FirstLastVTCalculator vt_calculator;
+	const FirstLastVTResult first_last_vt = vt_calculator.calculate(grammar);
+
+	PrecedenceTableBuilder table_builder;
+	const PrecedenceTableBuildResult table_result =
+	    table_builder.build(grammar, first_last_vt);
+
+	if (!table_result.success()) {
+		std::cout << "算符优先关系表存在冲突:\n";
+
+		for (const auto &conflict : table_result.conflicts) {
+			std::cout << toString(conflict.left) << ", "
+			          << toString(conflict.right) << ": 已有 "
+			          << toString(conflict.existing) << ", 新关系 "
+			          << toString(conflict.incoming) << ", " << conflict.reason
+			          << '\n';
+		}
+
+		return 1;
+	}
+
+	printPrecedenceTable(grammar, table_result.table);
 
 	return 0;
 }
