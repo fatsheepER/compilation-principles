@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "grammar.h"
-#include "parser.h"
+#include "input_token.h"
+#include "terminal.h"
 
 struct TokenReadError {
 	std::size_t expression_index = 0;

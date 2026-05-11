@@ -8,4 +8,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(lexical_analysis)
 
+add_subdirectory(syntax_analysis_common)
+
 add_subdirectory(syntax_analysis_top_down)

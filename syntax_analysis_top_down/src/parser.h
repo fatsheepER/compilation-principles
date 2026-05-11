@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "grammar.h"
+#include "input_token.h"
 
 /*
     输入符号序列示意:
@@ -15,12 +16,6 @@
         {Terminal::End, "#", 3},
     };
 */
-
-struct InputToken {
-	Terminal terminal = Terminal::End;
-	std::string lexeme;
-	std::size_t source_index = 0;
-};
 
 struct ParseStep {
 	int index = 0;

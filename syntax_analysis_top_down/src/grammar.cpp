@@ -154,25 +154,6 @@ void Grammar::addTableEntry(NonTerminal non_terminal, Terminal terminal,
 	table_[std::make_pair(non_terminal, terminal)] = production_id;
 }
 
-std::string toString(Terminal terminal) {
-	switch (terminal) {
-	case Terminal::Id:
-		return "i";
-	case Terminal::Plus:
-		return "+";
-	case Terminal::Mul:
-		return "*";
-	case Terminal::LParen:
-		return "(";
-	case Terminal::RParen:
-		return ")";
-	case Terminal::End:
-		return "#";
-	}
-
-	return "?";
-}
-
 std::string toString(NonTerminal non_terminal) {
 	switch (non_terminal) {
 	case NonTerminal::E:

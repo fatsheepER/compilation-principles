@@ -1,5 +1,4 @@
 #include "token_reader.h"
-#include "grammar.h"
 
 #include <cctype>
 #include <cstddef>

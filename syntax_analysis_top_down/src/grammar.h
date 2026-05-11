@@ -6,17 +6,9 @@
 #include <utility>
 #include <vector>
 
-enum class SymbolKind { Terminal, NonTerminal };
+#include "terminal.h"
 
-// 终结符
-enum class Terminal {
-	Id,     // i
-	Plus,   // +
-	Mul,    // *
-	LParen, // (
-	RParen, // )
-	End     // #
-};
+enum class SymbolKind { Terminal, NonTerminal };
 
 // 非终结符
 enum class NonTerminal {
@@ -68,7 +60,6 @@ class Grammar {
 	                   int production_id);
 };
 
-std::string toString(Terminal terminal);
 std::string toString(NonTerminal nonTerminal);
 std::string toString(const Symbol &symbol);
 std::string toString(const Production &production);

@@ -1,7 +1,6 @@
 add_library(syntax_analysis_top_down_lib
     src/grammar.cpp
     src/parser.cpp
-    src/token_reader.cpp
     src/result_writer.cpp
     src/evaluator.h
     src/evaluator.cpp
@@ -14,6 +13,11 @@ target_include_directories(syntax_analysis_top_down_lib
 
 add_executable(syntax_analysis_top_down
     src/main.cpp
+)
+
+target_link_libraries(syntax_analysis_top_down_lib
+    PUBLIC
+        syntax_analysis_common
 )
 
 target_link_libraries(syntax_analysis_top_down
