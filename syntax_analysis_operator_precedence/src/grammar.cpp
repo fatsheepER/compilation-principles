@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 Symbol Symbol::terminalSymbol(Terminal terminal) {
@@ -22,9 +21,6 @@ Symbol Symbol::nonTerminalSymbol(NonTerminal non_terminal) {
 }
 
 Grammar::Grammar() {
-	using NT = NonTerminal;
-	using T = Terminal;
-
 	terminals_ = {
 	    Terminal::Plus,   Terminal::Mul, Terminal::LParen,
 	    Terminal::RParen, Terminal::Id,  Terminal::End,
