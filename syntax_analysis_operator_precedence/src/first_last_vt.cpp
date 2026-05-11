@@ -137,7 +137,7 @@ bool FirstLastVTCalculator::propagateLastVT(const Grammar &grammar,
 }
 
 bool FirstLastVTCalculator::addSet(std::set<Terminal> &target,
-                                   std::set<Terminal> &source) {
+                                   const std::set<Terminal> &source) {
 	bool changed = false;
 
 	for (const auto terminal : source) {

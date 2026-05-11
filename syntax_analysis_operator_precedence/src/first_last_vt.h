@@ -24,7 +24,7 @@ class FirstLastVTCalculator {
 	static bool propagateFirstVT(const Grammar &, FirstLastVTResult &);
 	static bool propagateLastVT(const Grammar &, FirstLastVTResult &);
 
-	static bool addSet(std::set<Terminal> &, std::set<Terminal> &);
+	static bool addSet(std::set<Terminal> &, const std::set<Terminal> &);
 
 	static bool isTerminal(const Symbol &);
 	static bool isNonTerminal(const Symbol &);
