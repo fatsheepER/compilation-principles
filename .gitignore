@@ -20,6 +20,7 @@ compile_commands.json
 # Generated experiment output
 lexical_analysis/output/
 syntax_analysis_top_down/output/
+syntax_analysis_operator_precedence/output
 
 # Editor and OS files
 .DS_Store
