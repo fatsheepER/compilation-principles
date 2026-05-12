@@ -26,7 +26,8 @@ struct PrecedenceConflict {
 
 class PrecedenceTable {
   public:
-	std::optional<PrecedenceRelation> lookup(Terminal, Terminal) const;
+	std::optional<PrecedenceRelation> lookup(Terminal left,
+	                                         Terminal right) const;
 
 	bool set(Terminal left, Terminal right, PrecedenceRelation relation);
 
