@@ -1,5 +1,6 @@
 #include "first_last_vt.h"
 #include "grammar.h"
+#include "parser.h"
 #include "precedence_table.h"
 
 #include <iostream>
@@ -33,6 +34,13 @@ void printPrecedenceTable(const Grammar &grammar,
 		std::cout << '\n';
 	}
 }
+
+std::vector<InputToken> input = {
+    {Terminal::LParen, "(", 1}, {Terminal::Id, "i", 2},
+    {Terminal::Plus, "+", 3},   {Terminal::Id, "i", 4},
+    {Terminal::RParen, ")", 5}, {Terminal::Mul, "*", 6},
+    {Terminal::Id, "i", 7},     {Terminal::End, "#", 8},
+};
 } // namespace
 
 int main() {
@@ -60,6 +68,20 @@ int main() {
 	}
 
 	printPrecedenceTable(grammar, table_result.table);
+
+	OperatorPrecedenceParser parser;
+	const auto parse_result = parser.parse(input, table_result.table);
+
+	for (const auto &step : parse_result.steps) {
+		std::cout << step.index << "\t" << step.stack << "\t"
+		          << step.remaining_input << "\t" << step.relation << "\t"
+		          << step.action << '\n';
+	}
+
+	std::cout << (parse_result.accepted ? "正确" : "错误") << '\n';
+	if (!parse_result.accepted) {
+		std::cout << parse_result.error_message << '\n';
+	}
 
 	return 0;
 }
