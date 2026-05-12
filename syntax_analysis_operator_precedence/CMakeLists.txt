@@ -7,6 +7,8 @@ add_library(syntax_analysis_operator_precedence_lib
     src/precedence_table.cpp
     src/parser.h
     src/parser.cpp
+    src/result_writer.h
+    src/result_writer.cpp
 )
 
 target_include_directories(syntax_analysis_operator_precedence_lib
