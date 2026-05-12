@@ -2,86 +2,98 @@
 #include "grammar.h"
 #include "parser.h"
 #include "precedence_table.h"
+#include "result_writer.h"
+#include "token_reader.h"
 
+#include <exception>
+#include <filesystem>
 #include <iostream>
+#include <vector>
 
-namespace {
-void printPrecedenceTable(const Grammar &grammar,
-                          const PrecedenceTable &table) {
-	std::cout << "\nPrecedence Table:\n";
+namespace fs = std::filesystem;
 
-	std::cout << "    ";
-	for (const auto right : grammar.terminals()) {
-		std::cout << toString(right) << "   ";
-	}
-	std::cout << '\n';
+// usage:
+// syntax_analysis_operator_precedence
+// <token_path> <lexical_error_path> <output_dir>
+int main(int argc, char *argv[]) {
+	try {
+		fs::path token_path = "../lexical_analysis/output/result.txt";
+		fs::path lexical_error_path = "../lexical_analysis/output/error.txt";
+		fs::path output_dir = "output";
 
-	for (const auto left : grammar.terminals()) {
-		std::cout << toString(left) << "   ";
+		if (argc >= 2) {
+			token_path = argv[1];
+		}
 
-		for (const auto right : grammar.terminals()) {
-			const auto relation = table.lookup(left, right);
-			const std::string text = relationCell(relation);
+		if (argc >= 3) {
+			lexical_error_path = argv[2];
+		}
 
-			if (text.empty()) {
-				std::cout << "    ";
-			}
-			else {
-				std::cout << text << "   ";
+		if (argc >= 4) {
+			output_dir = argv[3];
+		}
+
+		Grammar grammar;
+
+		FirstLastVTCalculator vt_calculator;
+		const FirstLastVTResult first_last_vt =
+		    vt_calculator.calculate(grammar);
+
+		PrecedenceTableBuilder table_builder;
+		const PrecedenceTableBuildResult table_result =
+		    table_builder.build(grammar, first_last_vt);
+
+		TokenReader reader;
+		const TokenReaderResult read_result =
+		    reader.read(token_path.string(), lexical_error_path.string());
+
+		std::vector<OperatorExpressionReport> reports;
+
+		if (table_result.success() && read_result.lexical_passed) {
+			OperatorPrecedenceParser parser;
+
+			for (const auto &expression : read_result.expressions) {
+				OperatorExpressionReport report;
+				report.index = expression.index;
+				report.tokens = expression.tokens;
+				report.input_errors = expression.errors;
+
+				if (report.input_errors.empty()) {
+					report.parser_ran = true;
+					report.parse_result =
+					    parser.parse(report.tokens, table_result.table);
+				}
+
+				reports.push_back(report);
 			}
 		}
 
-		std::cout << '\n';
-	}
-}
+		OperatorPrecedenceResultWriter writer;
+		const OperatorPrecedenceResultWriteSummary summary =
+		    writer.write(output_dir.string(), grammar, first_last_vt,
+		                 table_result, read_result, reports);
 
-std::vector<InputToken> input = {
-    {Terminal::LParen, "(", 1}, {Terminal::Id, "i", 2},
-    {Terminal::Plus, "+", 3},   {Terminal::Id, "i", 4},
-    {Terminal::RParen, ")", 5}, {Terminal::Mul, "*", 6},
-    {Terminal::Id, "i", 7},     {Terminal::End, "#", 8},
-};
-} // namespace
-
-int main() {
-	Grammar grammar;
-
-	FirstLastVTCalculator vt_calculator;
-	const FirstLastVTResult first_last_vt = vt_calculator.calculate(grammar);
-
-	PrecedenceTableBuilder table_builder;
-	const PrecedenceTableBuildResult table_result =
-	    table_builder.build(grammar, first_last_vt);
-
-	if (!table_result.success()) {
-		std::cout << "算符优先关系表存在冲突:\n";
-
-		for (const auto &conflict : table_result.conflicts) {
-			std::cout << toString(conflict.left) << ", "
-			          << toString(conflict.right) << ": 已有 "
-			          << toString(conflict.existing) << ", 新关系 "
-			          << toString(conflict.incoming) << ", " << conflict.reason
-			          << '\n';
+		if (!table_result.success()) {
+			std::cout << "算符优先关系表构造失败，未执行表达式分析\n";
+			std::cout << "冲突数量: " << table_result.conflicts.size() << "\n";
+		}
+		else if (!read_result.lexical_passed) {
+			std::cout << "词法分析未通过，未执行算符优先语法分析\n";
+		}
+		else {
+			std::cout << "算符优先语法分析完毕\n";
+			std::cout << "共分析 " << summary.total << " 条表达式\n";
+			std::cout << "正确共 " << summary.accepted << " 条\n";
+			std::cout << "错误共 " << summary.rejected << " 条\n";
 		}
 
+		std::cout << "token 输入文件: " << token_path << "\n";
+		std::cout << "词法错误文件: " << lexical_error_path << "\n";
+		std::cout << "算符优先分析输出目录: " << output_dir << "\n";
+
+		return table_result.success() && read_result.lexical_passed ? 0 : 1;
+	} catch (const std::exception &ex) {
+		std::cerr << "Fatal error: " << ex.what() << "\n";
 		return 1;
 	}
-
-	printPrecedenceTable(grammar, table_result.table);
-
-	OperatorPrecedenceParser parser;
-	const auto parse_result = parser.parse(input, table_result.table);
-
-	for (const auto &step : parse_result.steps) {
-		std::cout << step.index << "\t" << step.stack << "\t"
-		          << step.remaining_input << "\t" << step.relation << "\t"
-		          << step.action << '\n';
-	}
-
-	std::cout << (parse_result.accepted ? "正确" : "错误") << '\n';
-	if (!parse_result.accepted) {
-		std::cout << parse_result.error_message << '\n';
-	}
-
-	return 0;
 }
