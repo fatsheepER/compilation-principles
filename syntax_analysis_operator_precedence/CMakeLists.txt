@@ -5,6 +5,8 @@ add_library(syntax_analysis_operator_precedence_lib
     src/first_last_vt.cpp
     src/precedence_table.h
     src/precedence_table.cpp
+    src/parser.h
+    src/parser.cpp
 )
 
 target_include_directories(syntax_analysis_operator_precedence_lib
