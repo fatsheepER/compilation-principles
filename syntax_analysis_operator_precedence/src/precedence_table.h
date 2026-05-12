@@ -6,9 +6,9 @@
 #include <utility>
 #include <vector>
 
-#include <first_last_vt.h>
-#include <grammar.h>
-#include <terminal.h>
+#include "first_last_vt.h"
+#include "grammar.h"
+#include "terminal.h"
 
 enum class PrecedenceRelation {
 	Less,    // <
