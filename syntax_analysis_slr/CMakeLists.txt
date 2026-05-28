@@ -1,6 +1,8 @@
 add_library(syntax_analysis_slr_lib
     src/grammar.h 
     src/grammar.cpp
+    src/follow_set.h
+    src/follow_set.cpp
 )
 
 target_include_directories(syntax_analysis_slr_lib
