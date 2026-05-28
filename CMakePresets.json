@@ -69,6 +69,22 @@
       "targets": [
         "run_syntax_analysis_top_down"
       ]
+    },
+    {
+      "name": "syntax_analysis_slr",
+      "displayName": "Build SLR(1) syntax analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "syntax_analysis_slr"
+      ]
+    },
+    {
+      "name": "run_syntax_analysis_slr",
+      "displayName": "Run SLR(1) syntax analysis",
+      "configurePreset": "debug",
+      "targets": [
+        "run_syntax_analysis_slr"
+      ]
     }
   ]
 }
