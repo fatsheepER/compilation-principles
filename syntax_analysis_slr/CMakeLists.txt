@@ -9,6 +9,8 @@ add_library(syntax_analysis_slr_lib
     src/slr_table.cpp
     src/parser.h
     src/parser.cpp
+    src/result_writer.h
+    src/result_writer.cpp
 )
 
 target_include_directories(syntax_analysis_slr_lib
