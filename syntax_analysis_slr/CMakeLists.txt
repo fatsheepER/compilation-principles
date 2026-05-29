@@ -7,6 +7,8 @@ add_library(syntax_analysis_slr_lib
     src/lr0_automaton.cpp
     src/slr_table.h
     src/slr_table.cpp
+    src/parser.h
+    src/parser.cpp
 )
 
 target_include_directories(syntax_analysis_slr_lib
