@@ -1,6 +1,7 @@
 #include "follow_set.h"
 #include "grammar.h"
 #include "lr0_automaton.h"
+#include "slr_table.h"
 
 #include <iostream>
 #include <optional>
@@ -133,6 +134,37 @@ int main() {
 		if (!ok) {
 			std::cout << "阶段性测试未通过。\n";
 			return 1;
+		}
+
+		SLRTableBuilder table_builder(grammar, automaton, follow_result);
+		SLRTableBuildResult table_result = table_builder.build();
+
+		std::cout << "=== SLR conflicts ===\n";
+		if (table_result.conflicts.empty()) {
+			std::cout << "No conflicts\n";
+		}
+		else {
+			for (const SLRConflict &conflict : table_result.conflicts) {
+				std::cout << toString(conflict) << "\n";
+			}
+		}
+
+		std::cout << "\n=== ACTION entries ===\n";
+		for (const auto &[key, action] : table_result.table.actions()) {
+			const int state = key.first;
+			const Terminal terminal = key.second;
+
+			std::cout << "ACTION[I" << state << ", " << toString(terminal)
+			          << "] = " << toString(action) << "\n";
+		}
+
+		std::cout << "\n=== GOTO entries ===\n";
+		for (const auto &[key, next_state] : table_result.table.gotos()) {
+			const int state = key.first;
+			const NonTerminal non_terminal = key.second;
+
+			std::cout << "GOTO[I" << state << ", " << toString(non_terminal)
+			          << "] = I" << next_state << "\n";
 		}
 
 		std::cout << "阶段性测试通过。\n";
