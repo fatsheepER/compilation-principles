@@ -1,6 +1,7 @@
 #include "follow_set.h"
 #include "grammar.h"
 #include "lr0_automaton.h"
+#include "parser.h"
 #include "slr_table.h"
 
 #include <iostream>
@@ -136,6 +137,8 @@ int main() {
 			return 1;
 		}
 
+		// SLRTableBuilder
+
 		SLRTableBuilder table_builder(grammar, automaton, follow_result);
 		SLRTableBuildResult table_result = table_builder.build();
 
@@ -165,6 +168,34 @@ int main() {
 
 			std::cout << "GOTO[I" << state << ", " << toString(non_terminal)
 			          << "] = I" << next_state << "\n";
+		}
+
+		// Parser
+		ExpressionInput expression;
+		expression.index = 1;
+		expression.tokens = {
+		    {Terminal::LParen, "(", 1}, {Terminal::Id, "i", 2},
+		    {Terminal::Plus, "+", 3},   {Terminal::Id, "i", 4},
+		    {Terminal::RParen, ")", 5}, {Terminal::Mul, "*", 6},
+		    {Terminal::Id, "i", 7},     {Terminal::End, "#", 8},
+		};
+
+		Parser parser(grammar, table_result.table);
+		ParseResult parse_result = parser.parse(expression);
+
+		std::cout << "\n=== Parse steps ===\n";
+		for (const ParseStep &step : parse_result.steps) {
+			std::cout << step.step_index << "\t";
+			std::cout << step.combined_stack << "\t";
+			std::cout << step.remaining_input << "\t";
+			std::cout << step.action << "\n";
+		}
+
+		std::cout << "\nParse result: "
+		          << (parse_result.accepted ? "accepted" : "rejected") << "\n";
+
+		if (parse_result.diagnostic.has_value()) {
+			std::cout << "Error: " << parse_result.diagnostic->message << "\n";
 		}
 
 		std::cout << "阶段性测试通过。\n";
