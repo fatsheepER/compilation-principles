@@ -2,115 +2,55 @@
 #include "grammar.h"
 #include "lr0_automaton.h"
 #include "parser.h"
+#include "result_writer.h"
 #include "slr_table.h"
+#include "token_reader.h"
 
+#include <exception>
 #include <iostream>
-#include <optional>
+#include <string>
+#include <vector>
 
 namespace {
-void printProductions(const Grammar &grammar) {
-	std::cout << "=== Productions ===\n";
+constexpr const char *TOKEN_PATH = "./lexical_analysis/output/result.txt";
+constexpr const char *LEXICAL_ERROR_PATH =
+    "./lexical_analysis/output/error.txt";
+constexpr const char *OUTPUT_DIR = "./syntax_analysis_slr/output";
 
-	for (const Production &production : grammar.productions()) {
-		std::cout << toString(production) << "\n";
+struct Summary {
+	std::size_t total = 0;
+	std::size_t accepted = 0;
+	std::size_t rejected = 0;
+};
+
+Summary summarize(const std::vector<ParseResult> &parse_results) {
+	Summary summary;
+	summary.total = parse_results.size();
+
+	for (const ParseResult &result : parse_results) {
+		if (result.accepted) {
+			++summary.accepted;
+		}
+		else {
+			++summary.rejected;
+		}
 	}
 
-	std::cout << "\n";
+	return summary;
 }
 
-void printFirstFollow(const Grammar &grammar,
-                      const FollowSetResult &follow_result) {
-	std::cout << "=== FIRST sets ===\n";
-
-	for (NonTerminal non_terminal : grammar.nonTerminals()) {
-		std::cout << "FIRST(" << toString(non_terminal) << ") = ";
-		std::cout << toString(follow_result.first.at(non_terminal)) << "\n";
-	}
-
-	std::cout << "\n";
-
-	std::cout << "=== FOLLOW sets ===\n";
-
-	for (NonTerminal non_terminal : grammar.nonTerminals()) {
-		std::cout << "FOLLOW(" << toString(non_terminal) << ") = ";
-		std::cout << toString(follow_result.follow.at(non_terminal)) << "\n";
-	}
-
-	std::cout << "\n";
+void printSummary(const Summary &summary) {
+	std::cout << "SLR(1) 语法分析完成\n";
+	std::cout << "表达式总数: " << summary.total << "\n";
+	std::cout << "正确: " << summary.accepted << "\n";
+	std::cout << "错误: " << summary.rejected << "\n";
+	std::cout << "详细结果见 " << OUTPUT_DIR << "/\n";
 }
 
-void printAutomaton(const Grammar &grammar, const LR0Automaton &automaton) {
-	std::cout << "=== LR(0) item sets ===\n";
-
-	for (const ItemSet &item_set : automaton.item_sets) {
-		std::cout << toString(item_set, grammar) << "\n";
-	}
-
-	std::cout << "=== LR(0) transitions ===\n";
-
-	for (const Transition &transition : automaton.transitions) {
-		std::cout << toString(transition) << "\n";
-	}
-
-	std::cout << "\n";
-}
-
-bool expectTransition(const LR0Automaton &automaton, int from,
-                      const Symbol &symbol, int expected_to) {
-	std::optional<int> actual_to = automaton.transition(from, symbol);
-
-	if (!actual_to.has_value()) {
-		std::cout << "[FAIL] missing transition: I" << from << " -- "
-		          << toString(symbol) << " --> I" << expected_to << "\n";
-		return false;
-	}
-
-	if (*actual_to != expected_to) {
-		std::cout << "[FAIL] wrong transition: I" << from << " -- "
-		          << toString(symbol) << " --> I" << *actual_to
-		          << ", expected I" << expected_to << "\n";
-		return false;
-	}
-
-	std::cout << "[OK] I" << from << " -- " << toString(symbol) << " --> I"
-	          << expected_to << "\n";
-	return true;
-}
-
-bool runChecks(const LR0Automaton &automaton) {
-	std::cout << "=== Checks ===\n";
-
-	bool ok = true;
-
-	if (automaton.item_sets.size() != 13) {
-		std::cout << "[FAIL] LR(0) item set count = "
-		          << automaton.item_sets.size() << ", expected 13\n";
-		ok = false;
-	}
-	else {
-		std::cout << "[OK] LR(0) item set count = 13\n";
-	}
-
-	ok = expectTransition(automaton, 0, makeNonTerminal(NonTerminal::S), 1) &&
-	     ok;
-	ok = expectTransition(automaton, 0, makeNonTerminal(NonTerminal::E), 2) &&
-	     ok;
-	ok = expectTransition(automaton, 0, makeNonTerminal(NonTerminal::T), 3) &&
-	     ok;
-	ok = expectTransition(automaton, 0, makeNonTerminal(NonTerminal::F), 4) &&
-	     ok;
-	ok =
-	    expectTransition(automaton, 0, makeTerminal(Terminal::LParen), 5) && ok;
-	ok = expectTransition(automaton, 0, makeTerminal(Terminal::Id), 6) && ok;
-
-	ok = expectTransition(automaton, 2, makeTerminal(Terminal::Plus), 7) && ok;
-	ok = expectTransition(automaton, 3, makeTerminal(Terminal::Mul), 8) && ok;
-	ok = expectTransition(automaton, 5, makeNonTerminal(NonTerminal::E), 9) &&
-	     ok;
-	ok = expectTransition(automaton, 10, makeTerminal(Terminal::Mul), 8) && ok;
-
-	std::cout << "\n";
-	return ok;
+void printStaticSummary(const LR0Automaton &automaton,
+                        const SLRTableBuildResult &table_result) {
+	std::cout << "LR(0) 项目集数量: " << automaton.item_sets.size() << "\n";
+	std::cout << "SLR(1) 表冲突数量: " << table_result.conflicts.size() << "\n";
 }
 } // namespace
 
@@ -118,90 +58,60 @@ int main() {
 	try {
 		Grammar grammar;
 
-		printProductions(grammar);
-
 		FollowSetCalculator follow_calculator(grammar);
 		FollowSetResult follow_result = follow_calculator.calculate();
-
-		printFirstFollow(grammar, follow_result);
 
 		LR0AutomatonBuilder automaton_builder(grammar);
 		LR0Automaton automaton = automaton_builder.build();
 
-		printAutomaton(grammar, automaton);
-
-		const bool ok = runChecks(automaton);
-
-		if (!ok) {
-			std::cout << "阶段性测试未通过。\n";
-			return 1;
-		}
-
-		// SLRTableBuilder
-
 		SLRTableBuilder table_builder(grammar, automaton, follow_result);
 		SLRTableBuildResult table_result = table_builder.build();
 
-		std::cout << "=== SLR conflicts ===\n";
-		if (table_result.conflicts.empty()) {
-			std::cout << "No conflicts\n";
-		}
-		else {
-			for (const SLRConflict &conflict : table_result.conflicts) {
-				std::cout << toString(conflict) << "\n";
-			}
-		}
+		ResultWriter writer(OUTPUT_DIR);
+		writer.writeStaticOutputs(grammar, follow_result, automaton,
+		                          table_result);
 
-		std::cout << "\n=== ACTION entries ===\n";
-		for (const auto &[key, action] : table_result.table.actions()) {
-			const int state = key.first;
-			const Terminal terminal = key.second;
+		printStaticSummary(automaton, table_result);
 
-			std::cout << "ACTION[I" << state << ", " << toString(terminal)
-			          << "] = " << toString(action) << "\n";
+		if (!table_result.conflicts.empty()) {
+			std::cerr << "SLR(1) 分析表存在冲突，语法分析未执行。\n";
+			std::cerr << "冲突详情见 " << OUTPUT_DIR << "/slr_table.txt\n";
+			return 1;
 		}
 
-		std::cout << "\n=== GOTO entries ===\n";
-		for (const auto &[key, next_state] : table_result.table.gotos()) {
-			const int state = key.first;
-			const NonTerminal non_terminal = key.second;
+		TokenReader reader;
+		TokenReaderResult token_result =
+		    reader.read(TOKEN_PATH, LEXICAL_ERROR_PATH);
 
-			std::cout << "GOTO[I" << state << ", " << toString(non_terminal)
-			          << "] = I" << next_state << "\n";
+		if (!token_result.lexical_passed) {
+			writer.writeLexicalFailure(token_result.lexical_error_text);
+			std::cerr << "词法分析未通过，SLR(1) 语法分析未执行。\n";
+			std::cerr << "错误详情见 " << OUTPUT_DIR << "/error.txt\n";
+			return 1;
 		}
 
-		// Parser
-		ExpressionInput expression;
-		expression.index = 1;
-		expression.tokens = {
-		    {Terminal::LParen, "(", 1}, {Terminal::Id, "i", 2},
-		    {Terminal::Plus, "+", 3},   {Terminal::Id, "i", 4},
-		    {Terminal::RParen, ")", 5}, {Terminal::Mul, "*", 6},
-		    {Terminal::Id, "i", 7},     {Terminal::End, "#", 8},
-		};
+		if (!token_result.file_errors.empty()) {
+			writer.writeTokenFileErrors(token_result.file_errors);
+			std::cerr << "token 文件存在错误，SLR(1) 语法分析未执行。\n";
+			std::cerr << "错误详情见 " << OUTPUT_DIR << "/error.txt\n";
+			return 1;
+		}
 
 		Parser parser(grammar, table_result.table);
-		ParseResult parse_result = parser.parse(expression);
 
-		std::cout << "\n=== Parse steps ===\n";
-		for (const ParseStep &step : parse_result.steps) {
-			std::cout << step.step_index << "\t";
-			std::cout << step.combined_stack << "\t";
-			std::cout << step.remaining_input << "\t";
-			std::cout << step.action << "\n";
+		std::vector<ParseResult> parse_results;
+		parse_results.reserve(token_result.expressions.size());
+
+		for (const ExpressionInput &expression : token_result.expressions) {
+			parse_results.push_back(parser.parse(expression));
 		}
 
-		std::cout << "\nParse result: "
-		          << (parse_result.accepted ? "accepted" : "rejected") << "\n";
+		writer.writeParseOutputs(parse_results);
+		printSummary(summarize(parse_results));
 
-		if (parse_result.diagnostic.has_value()) {
-			std::cout << "Error: " << parse_result.diagnostic->message << "\n";
-		}
-
-		std::cout << "阶段性测试通过。\n";
 		return 0;
 	} catch (const std::exception &ex) {
-		std::cerr << "程序异常: " << ex.what() << "\n";
+		std::cerr << "SLR(1) 语法分析程序异常: " << ex.what() << "\n";
 		return 1;
 	}
 }
