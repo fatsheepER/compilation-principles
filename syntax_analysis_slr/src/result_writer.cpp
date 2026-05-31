@@ -170,16 +170,14 @@ void ResultWriter::writeParseOutputs(
 			}
 
 			ofs << std::left << std::setw(8) << "步骤" << std::setw(20)
-			    << "状态栈" << std::setw(24) << "符号栈" << std::setw(32)
-			    << "综合栈" << std::setw(24) << "剩余输入"
-			    << "动作\n";
+			    << "状态栈" << std::setw(24) << "符号栈" << std::setw(24)
+			    << "剩余输入" << "动作\n";
 
 			for (const ParseStep &step : result.steps) {
 				ofs << std::left << std::setw(8) << step.step_index
 				    << std::setw(20) << step.state_stack << std::setw(24)
-				    << step.symbol_stack << std::setw(32) << step.combined_stack
-				    << std::setw(24) << step.remaining_input << step.action
-				    << "\n";
+				    << step.symbol_stack << std::setw(24)
+				    << step.remaining_input << step.action << "\n";
 			}
 
 			ofs << "\n";

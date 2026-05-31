@@ -42,7 +42,6 @@ struct ParseStep {
 
 	std::string state_stack;
 	std::string symbol_stack;
-	std::string combined_stack;
 	std::string remaining_input;
 
 	std::string action;
@@ -72,10 +71,6 @@ class Parser {
 	static std::string stateStackToString(const std::vector<int> &stack);
 
 	static std::string symbolStackToString(const std::vector<Symbol> &stack);
-
-	static std::string
-	combinedStackToString(const std::vector<Symbol> &symbol_stack,
-	                      const std::vector<int> &state_stack);
 
 	static std::string
 	remainingInputToString(const std::vector<InputToken> &tokens,

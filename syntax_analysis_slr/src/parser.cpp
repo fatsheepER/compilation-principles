@@ -237,28 +237,6 @@ Parser::symbolStackToString(const std::vector<Symbol> &symbol_stack) {
 }
 
 std::string
-Parser::combinedStackToString(const std::vector<Symbol> &symbol_stack,
-                              const std::vector<int> &state_stack) {
-	std::ostringstream oss;
-
-	const std::size_t count = symbol_stack.size();
-
-	for (std::size_t i = 0; i < count; ++i) {
-		if (i > 0) {
-			oss << " ";
-		}
-
-		oss << toString(symbol_stack[i]);
-
-		if (i < state_stack.size()) {
-			oss << " " << state_stack[i];
-		}
-	}
-
-	return oss.str();
-}
-
-std::string
 Parser::remainingInputToString(const std::vector<InputToken> &tokens,
                                std::size_t input_index) {
 	std::ostringstream oss;
@@ -304,7 +282,6 @@ ParseStep Parser::makeStep(std::size_t step_index,
 	step.step_index = step_index;
 	step.state_stack = stateStackToString(state_stack);
 	step.symbol_stack = symbolStackToString(symbol_stack);
-	step.combined_stack = combinedStackToString(symbol_stack, state_stack);
 	step.remaining_input = remainingInputToString(tokens, input_index);
 	step.action = action;
 	return step;

@@ -464,7 +464,6 @@ struct ParseStep {
     std::size_t step_index;
     std::string state_stack;
     std::string symbol_stack;
-    std::string combined_stack;
     std::string remaining_input;
     std::string action;
 };
